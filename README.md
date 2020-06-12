@@ -15,17 +15,25 @@ Pthon 3.6+ is required to run this script.
 
 You will also need to install portaudio on your machine.
 
-On macOS, run:
+### macOS
+
+Just run (homebrew is taken for granted):
 ```
 brew install portaudio
 ```
 
-On Linux, run:
+### Linux (Ubuntu/Debian)
+
+Run:
 ```
-sudo apt install portaudio
+sudo apt-get install libasound-dev portaudio19-dev python-pyaudio python3-pyaudio
 ```
 
-Create a python virtual environment:
+If the above didn't work as expected, please follow the solutions suggested in [this thread](https://stackoverflow.com/questions/20023131/cannot-install-pyaudio-gcc-error).
+
+### Virtualenv
+
+It is recommended to create a python virtual environment:
 ```
 python3 -m venv env
 source env/bin/activate
@@ -35,8 +43,6 @@ To install the dependencies, run:
 ```
 pip install -r requirements.txt
 ```
-
-### MacOS X
 
 On macOS, you might have to install pyaudio with a tweak:
 ```
@@ -49,6 +55,8 @@ Simply run:
 ```
 python -u netmic.py
 ```
+
+To set additional parameters, check the program's help page (`python -u netmic.py --help`).
 
 **NOTE: you may need to run the script with `sudo` for microphone access.**
 
