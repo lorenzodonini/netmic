@@ -67,3 +67,11 @@ As soon as a connection is opened, it opens the microphone and starts streaming 
 Netmic uses a queue to buffer audio chunks, before sending them over the network.
 If a client doesn't consume the network input quickly enough, eventually audio frames will be dropped.
 
+### Input devices
+
+The audio input device with ID 0 is used by default (ID as recognized by portaudio). You may change this using the `-i <id>` argument.
+
+If you don't know what device ID to pick, you can list all available input devices with:
+```
+python -u netmic.py -l
+```

@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import socket
 import pyaudio
 import logging
@@ -94,13 +96,30 @@ def handle_client(server: socket.socket, audio: pyaudio.PyAudio, config: object)
     logging.info("Accepted connection from %s", addr)
     t = threading.Thread(target=process_audio, args=(sock,))
     t.start()
-    record_audio(audio, config)
+    try:
+        record_audio(audio, config)
+    except Exception as e:
+        logging.exception(e)
+        logging.error("Are you using the correct audio input device?")
     t.join()
     logging.info("Finished handling client %s", addr)
+
+def list_inputs(audio: pyaudio.PyAudio):
+    count = audio.get_device_count()
+    found = 0
+    for i in range(0, count):
+        dev_info = audio.get_device_info_by_index(i)
+        if 'maxInputChannels' in dev_info and dev_info['maxInputChannels'] > 0:
+            # Device is an input device
+            found += 1
+            print("Device ID: {}\nName: {}\nInput channels: {}\nDefaultSampleRate: {}\n".format(dev_info['index'], dev_info['name'], dev_info['maxInputChannels'], dev_info['defaultSampleRate']))
+    if found == 0:
+        print("No audio input devices found! Check your hardware and system settings")
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description='netmic')
     parser.add_argument('-i', '--input', type=int, nargs='?', help='the index of the input device (default is 0)', default=0)
+    parser.add_argument('-l', '--list_inputs', help='list the available audio input devices, so you may pass the correct one to the -i command', action="store_true")
     parser.add_argument('-p', '--port', type=int, help='the TCP port to listen on', default=8347)
     parser.add_argument('-f', '--format', type=str, help='the audio input format (supported formats are Float32, Int32, Int24, Int16, Int8, UInt8)', default='Int16')
     parser.add_argument('-r', '--rate', type=int, help='the sample rate', default=16000)
@@ -130,6 +149,9 @@ def main():
     logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
     audio = pyaudio.PyAudio()
     config = parse_args()
+    if config.list_inputs == True:
+        list_inputs(audio)
+        return
     serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     serversocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     serversocket.bind(("0.0.0.0", config.port))
